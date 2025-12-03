@@ -1,8 +1,12 @@
-package com.bata.backend.modules.user.entity;
+package com.bata.backend.modules.user.entities;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,7 +38,12 @@ public class UserEntity {
 	@Column(name = "birthday")
 	private LocalDate birthday;
 	
-
+	@OneToMany(mappedBy = "user") //este valor coincide con la variable en AddressEntity
+	List<AddressEntity> address;
+	
+	@OneToOne
+	@JoinColumn(name = "login_id")
+	private LoginEntity login;
 	
 
 }
