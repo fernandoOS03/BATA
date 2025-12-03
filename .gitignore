@@ -39,3 +39,4 @@ frontend/.vscode/
 # --- SISTEMA ---
 .DS_Store
 Thumbs.db
+/.metadata/

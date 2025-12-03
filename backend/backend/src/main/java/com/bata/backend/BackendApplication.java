@@ -3,7 +3,7 @@ package com.bata.backend;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.bata.backend.modules.user.entity.UserEntity;
+import com.bata.backend.modules.user.entities.UserEntity;
 
 @SpringBootApplication
 public class BackendApplication {
