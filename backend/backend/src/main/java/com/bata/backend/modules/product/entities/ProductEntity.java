@@ -1,15 +1,9 @@
 package com.bata.backend.modules.product.entities;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -32,6 +26,11 @@ public class ProductEntity {
 	@Column(name = "base_price")
 	private BigDecimal basePrice;
 	
+	//====== Relacación con ProductVariant ====== 
+	@OneToMany(mappedBy = "product")
+	List<ProductVariantEntity> productsVariants;
+	
+	//====== Relacaciones con tablas hijas ====== 
 	@ManyToOne
 	@JoinColumn(name = "material_id")
 	private MaterialEntity material;
@@ -40,10 +39,12 @@ public class ProductEntity {
 	@JoinColumn(name = "category_id")
 	private CategoryEntity category;
 	
-	
 	@ManyToOne
 	@JoinColumn(name = "brand_id")
 	private BrandEntity brand;
+	
+
+	
 	
 	
 }

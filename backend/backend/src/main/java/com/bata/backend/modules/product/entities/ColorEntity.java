@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "materials")
-public class MaterialEntity {
+@Table(name = "colors")
+public class ColorEntity {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -16,4 +17,5 @@ public class MaterialEntity {
 	
 	@Column(name = "name")
 	private String  name;
+
 }
