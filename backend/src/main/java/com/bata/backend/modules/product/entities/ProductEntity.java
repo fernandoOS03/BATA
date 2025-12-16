@@ -27,7 +27,7 @@ public class ProductEntity {
 	private BigDecimal basePrice;
 	
 	//====== Relacación con ProductVariant ====== 
-	@OneToMany(mappedBy = "product")
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
 	List<ProductVariantEntity> productsVariants;
 	
 	//====== Relacaciones con tablas hijas ====== 
