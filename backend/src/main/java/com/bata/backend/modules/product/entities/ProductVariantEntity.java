@@ -26,6 +26,9 @@ public class ProductVariantEntity {
 	@Column(name = "price_modifier")
 	private BigDecimal priceModifier;
 	
+	@Column(name = "imagen_url")
+	private String imagenUrl;
+	
 	//====== Relacación con Product ====== 
 	@ManyToOne
 	@JoinColumn(name = "product_id")
