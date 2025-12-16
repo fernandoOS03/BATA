@@ -22,6 +22,10 @@ public class LoginEntity {
 	private String password;
 
 	@Column(name="rol")
-	private String rol;
+	private String role;
+	
+	@OneToOne
+	@JoinColumn(name = "user_id")
+	private UserEntity user;
 
 }

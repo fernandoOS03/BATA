@@ -13,29 +13,31 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "users")
 public class UserEntity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private Integer id;
-	
-	@Column(name = "name")
-	private String  name;
-	
-	@Column(name = "last_name")
-	private String lastName;
-	
-	@Column(name = "dni")
-	private String dni;
-	
-	@Column(name = "birthday")
-	private LocalDate birthday;
-	
-	@OneToMany(mappedBy = "user") //este valor coincide con la variable en AddressEntity
-	List<AddressEntity> address;
-	
-	@OneToOne
-	@JoinColumn(name = "login_id")
-	private LoginEntity login;
-	
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+    
+    @Column(name = "name")
+    private String name;
+    
+    @Column(name = "last_name")
+    private String lastName;
+    
+    @Column(name = "dni")
+    private String dni;
+    
+    @Column(name = "birthday")
+    private LocalDate birthday;
+    
+    // Agregado cascade = CascadeType.ALL para evitar errores al guardar direcciones
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL) 
+    private List<AddressEntity> address;
+    
+    // 'cascade = CascadeType.ALL' permite guardar el Login automáticamente cuando guardas el User
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "login_id")
+    private LoginEntity login;
 
 }
