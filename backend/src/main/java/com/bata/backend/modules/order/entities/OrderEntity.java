@@ -1,24 +1,27 @@
 package com.bata.backend.modules.order.entities;
 
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import com.bata.backend.modules.payment.entities.PaymentEntity;
 import com.bata.backend.modules.user.entities.AddressEntity;
+import com.bata.backend.modules.user.entities.UserEntity;
 
-import lombok.Data;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import lombok.NoArgsConstructor;
 import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
@@ -37,10 +40,10 @@ public class OrderEntity {
 	private String status;
 	
 	@Column(name = "total_amount")
-	private Integer totalAmount;
+	private BigDecimal totalAmount;
 	
 	//====== Relacación con OrderItem ====== 
-	@OneToMany(mappedBy = "order")
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
 	List<OrderItemEntity> orderItems;
 	
 	
@@ -52,6 +55,21 @@ public class OrderEntity {
 	 //====== Relacación con Payment ======
 	 @OneToOne(mappedBy = "order")
 	 private PaymentEntity payment;
+	 
+	 //====== Relacación con Usuario ======
+	 @ManyToOne
+	 @JoinColumn(name = "user_id")
+	 private UserEntity user;
+	 
+	// ==========================================================
+	// MÉTODOS
+	// ==========================================================	
+	 public String getFullAddress() {
+		 if (this.address == null) return "Sin dirección asignada";
+	        return this.address.getStreet() + ", " + this.address.getCity();
+	 }
+	
+
 
 
 }

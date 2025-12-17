@@ -1,6 +1,8 @@
 package com.bata.backend.modules.payment.entities;
 
 
+import java.math.BigDecimal;
+
 import com.bata.backend.modules.order.entities.OrderEntity;
 
 import jakarta.persistence.*;
@@ -21,7 +23,7 @@ public class PaymentEntity {
 	private String transactionId;
 
 	@Column(name="amount")
-	private String amount;
+	private BigDecimal amount;
 	
 	@Column(name="payment_method")
 	private String paymentMethod;
