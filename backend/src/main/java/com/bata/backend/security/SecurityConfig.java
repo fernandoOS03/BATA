@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/register", "/api/users/login").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api//pruducts").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products").authenticated()
+                .requestMatchers("/api/orders/**").authenticated() //solo usuaris autenticados pueden comprar
                 .anyRequest().authenticated() // ¡Todo lo demás cerrado!
             )
             // IMPORTANTE: Gestión de sesión STATELESS (Sin estado)
