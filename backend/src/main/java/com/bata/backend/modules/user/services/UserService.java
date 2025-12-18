@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.bata.backend.exceptions.BadRequestException;
+import com.bata.backend.exceptions.ResourceNotFoundException;
 import com.bata.backend.modules.user.dto.request.UserLoginRequest;
 import com.bata.backend.modules.user.dto.request.UserRegisterRequest;
 import com.bata.backend.modules.user.dto.response.UserLoginResponse;
@@ -63,11 +65,11 @@ public class UserService {
 		LoginEntity loginEncontrado = userRepository.findAll().stream().map(UserEntity::getLogin) 
 																																																	
 				.filter(login -> login.getEmail().equals(request.email())).findFirst()
-				.orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+				.orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
 		// 2. Verificar si la contraseña coincide (Raw vs Encriptada)
 		if (!passwordEncoder.matches(request.password(), loginEncontrado.getPassword())) {
-			throw new RuntimeException("Contraseña incorrecta");
+			throw new BadRequestException("Contraseña incorrecta");
 		}
 
 		// 3. Si todo sale bien, preparamos la respuesta

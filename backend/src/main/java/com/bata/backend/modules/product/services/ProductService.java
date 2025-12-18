@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.bata.backend.exceptions.ResourceNotFoundException;
 import com.bata.backend.modules.product.dto.request.ProductRequest;
 import com.bata.backend.modules.product.dto.response.ProductResponse;
 import com.bata.backend.modules.product.entities.BrandEntity;
@@ -56,13 +57,13 @@ public class ProductService {
 		// PASO 2: Buscar y asignar las relaciones "Padre" (Marca, Categoría, Material)
 		// Si no existen, lanzamos error para avisar al admin.
 		BrandEntity brand = brandRepository.findById(request.brandId())
-				.orElseThrow(() -> new RuntimeException("Marca no encontrada con ID: " + request.brandId()));
+				.orElseThrow(() -> new ResourceNotFoundException("Marca no encontrada con ID: " + request.brandId()));
 
 		CategoryEntity category = categoryRepository.findById(request.categoryId())
-				.orElseThrow(() -> new RuntimeException("Categoría no encontrada con ID: " + request.categoryId()));
+				.orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + request.categoryId()));
 
 		MaterialEntity material = materialRepository.findById(request.materialId())
-				.orElseThrow(() -> new RuntimeException("Material no encontrado con ID: " + request.materialId()));
+				.orElseThrow(() -> new ResourceNotFoundException("Material no encontrado con ID: " + request.materialId()));
 
 		product.setBrand(brand);
 		product.setCategory(category);
@@ -84,10 +85,10 @@ public class ProductService {
 
 			// b) Buscar Color y Talla
 			ColorEntity color = colorRepository.findById(variantReq.colorId())
-					.orElseThrow(() -> new RuntimeException("Color no encontrado ID: " + variantReq.colorId()));
+					.orElseThrow(() -> new ResourceNotFoundException("Color no encontrado ID: " + variantReq.colorId()));
 
 			SizeEntity size = sizeRepository.findById(variantReq.sizeId())
-					.orElseThrow(() -> new RuntimeException("Talla no encontrada ID: " + variantReq.sizeId()));
+					.orElseThrow(() -> new ResourceNotFoundException("Talla no encontrada ID: " + variantReq.sizeId()));
 
 			variantEntity.setColor(color);
 			variantEntity.setSize(size);

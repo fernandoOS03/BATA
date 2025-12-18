@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.bata.backend.modules.order.dto.request.OrderRequest;
+import com.bata.backend.exceptions.BadRequestException;
+import com.bata.backend.exceptions.ResourceNotFoundException;
 import com.bata.backend.modules.order.dto.request.OrderItemRequest;
 import com.bata.backend.modules.order.dto.response.OrderResponse;
 import com.bata.backend.modules.order.entities.OrderEntity;
@@ -44,12 +46,12 @@ public class OrderService {
 
 		// ----- Buscamos quien comprara -----
 		LoginEntity login = loginRepository.findByEmail(userEmail)
-				.orElseThrow(() -> new RuntimeException("Usuario/Login no encontrado con email: " + userEmail));
+				.orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + userEmail));
 		UserEntity user = login.getUser();
 
 		// ----- Buscamos la dirección -----
 		AddressEntity address = addressRepository.findById(request.addressId())
-				.orElseThrow(() -> new RuntimeException("Dirección no encontrada"));
+				.orElseThrow(() -> new ResourceNotFoundException("Dirección no encontrada" + request.addressId()));
 
 		// ----- Iniciamos la orden -----
 		OrderEntity order = new OrderEntity();
@@ -68,11 +70,11 @@ public class OrderService {
 
 			// Primero buscamos la variante en la db
 			ProductVariantEntity variant = productVariantRepository.findById(itemReq.variantId())
-					.orElseThrow(() -> new RuntimeException("Producto no encontrado ID: " + itemReq.variantId()));
+					.orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado ID: " + itemReq.variantId()));
 
 			// Continuamos validando stocko
 			if (variant.getStock() < itemReq.quantity()) {
-				throw new RuntimeException("Stock insuficiente para: " + variant.getProduct().getName());
+				throw new BadRequestException("Stock insuficiente para: " + variant.getProduct().getName());
 			}
 
 			// Continuamos actualizando inventario
@@ -125,11 +127,11 @@ public class OrderService {
 
 		// ---- Recuperamos el usuario ----
 		LoginEntity login = loginRepository.findByEmail(userEmail)
-				.orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+				.orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
 		UserEntity user = login.getUser();
 		if (user == null)
-			throw new RuntimeException("Perfil de usuario no configurado");
+			throw new BadRequestException("Perfil de usuario no configurado");
 
 		// ----Buscamos sus pedidos ----
 		List<OrderEntity> orders = orderRepository.findByUserId(user.getId());
