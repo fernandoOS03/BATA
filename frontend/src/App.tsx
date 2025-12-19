@@ -8,6 +8,9 @@ function App() {
         <p className="text-lg text-gray-600">
           Si ves esto rojo y centrado, Tailwind funciona.
         </p>
+        <div className="bg-white p-6 rounded-xl shadow-card hover:shadow-card-hover transition-shadow duration-300">
+          <h3>Zapatilla Bata</h3>
+        </div>
         <button className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
           Comprar Ahora
         </button>
