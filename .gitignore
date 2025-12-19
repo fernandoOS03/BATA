@@ -1,9 +1,10 @@
-# --- JAVA / SPRING BOOT ---
+--- JAVA / SPRING BOOT ---
+
 backend/target/
 backend/.mvn/
 backend/mvnw
 backend/mvnw.cmd
-backend/**/*.class
+backend//*.class
 backend/.settings/
 backend/.classpath
 backend/.project
@@ -12,10 +13,11 @@ backend/.metadata/
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+!/src/main//target/
+!/src/test/**/target/
 
-### STS ###
+STS
+
 .apt_generated
 .classpath
 .factorypath
@@ -24,19 +26,28 @@ target/
 .springBeans
 .sts4-cache
 
+VS Code
 
-### VS Code ###
 .vscode/
 
+--- REACT / NODE (Frontend) ---
 
-# --- ANGULAR / NODE ---
 frontend/node_modules/
 frontend/dist/
-frontend/.angular/
-frontend/.editorconfig
-frontend/.vscode/
+frontend/dist-ssr/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/.eslintcache
 
-# --- SISTEMA ---
+--- SISTEMA ---
+
 .DS_Store
 Thumbs.db
 /.metadata/
