@@ -45,6 +45,16 @@ public class ProductService {
 	public List<ProductResponse> getAllProducts() {
 		return productRepository.findAll().stream().map(productMapper::toDto).collect(Collectors.toList());
 	}
+	
+	// =============================================================
+		// METODO PARA MOSTAR UN PRODUCTO POR SU ID
+		// =============================================================
+    public ProductResponse getProductById(Integer id) {
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
+        
+        return productMapper.toDto(product);
+    }
 
 	// =============================================================
 	// METODO PARA CREAR UN PRODUCTO CON SUS ENTIDADES

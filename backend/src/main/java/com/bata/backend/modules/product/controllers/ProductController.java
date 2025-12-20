@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +30,15 @@ public class ProductController {
 	public ResponseEntity<List<ProductResponse>> getAll(){
 		 return ResponseEntity.ok(productService.getAllProducts());
 	 }
+	
+	// ==========================================================
+	//1. ENDPOINT PÚBLICO : Para ver un producto por su id
+	// ==========================================================
+	@GetMapping("/{id}")
+	public ResponseEntity<ProductResponse> getById(@PathVariable Integer id){
+		 return ResponseEntity.ok(productService.getProductById(id));
+	 }
+	
 	
 	// ==========================================================
 	//1. ENDPOINT PRIVADO : Crear producto (solo admin)
