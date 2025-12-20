@@ -18,53 +18,64 @@ import com.bata.backend.security.jwt.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 
-/*
- * Cierra todas las puertas excepto login/registro.
- * Se agrega un filtro a trabajar*/
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	private final JwtAuthenticationFilter jwtAuthFilter; // Inyectar Filtro
-	private final AuthenticationProvider authenticationProvider; // Inyectar Provider
+    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final AuthenticationProvider authenticationProvider;
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(
-						auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
-								.permitAll().requestMatchers("/api/users/register", "/api/users/login").permitAll()
-								.requestMatchers(org.springframework.http.HttpMethod.GET, "/api//pruducts").permitAll()
-								.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products")
-								.hasRole("ADMIN").requestMatchers("/api/orders/**").authenticated() // solo usuaris
-																									// autenticados
-																									// pueden comprar
-								.anyRequest().authenticated() // ¡Todo lo demás cerrado!
-				)
-				// IMPORTANTE: Gestión de sesión STATELESS (Sin estado)
-				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authenticationProvider(authenticationProvider)
-				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // <--- AQUÍ SE AGREGA EL
-																								// FILTRO
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            // CAMBIO CLAVE 1: Enlazamos explícitamente tu configuración de CORS
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
+            
+            .authorizeHttpRequests(auth -> auth
+                // Documentación Swagger
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                
+                // Auth
+                .requestMatchers("/api/users/register", "/api/users/login").permitAll()
+                
+                // Productos (GET Público, POST Admin)
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products").hasRole("ADMIN")
+                
+                // Órdenes
+                .requestMatchers("/api/orders/**").authenticated()
+                
+                // Todo lo demás
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider)
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-		return http.build();
-	}
+        return http.build();
+    }
 
-	//------ PARA LOS CORS ------
-	@Bean
-	public CorsConfigurationSource configurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
+    // CAMBIO CLAVE 2: Renombramos el método a 'corsConfigurationSource'
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-		configuration.setAllowCredentials(true);
+        // Orígenes permitidos (React y Angular/Otro)
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
+        
+        // Métodos permitidos
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        // Cabeceras permitidas (Vital para que pase el Token)
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        
+        // Credenciales
+        configuration.setAllowCredentials(true);
 
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
-		return source;
-	};
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }
