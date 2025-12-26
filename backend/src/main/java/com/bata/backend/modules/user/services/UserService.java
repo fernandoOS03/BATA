@@ -4,11 +4,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.bata.backend.exceptions.BadRequestException;
 import com.bata.backend.exceptions.ResourceNotFoundException;
+import com.bata.backend.modules.product.entities.ProductEntity;
+import com.bata.backend.modules.product.repositories.ProductRepository;
 import com.bata.backend.modules.user.dto.request.UserLoginRequest;
 import com.bata.backend.modules.user.dto.request.UserRegisterRequest;
 import com.bata.backend.modules.user.dto.response.UserLoginResponse;
@@ -30,11 +34,9 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
 
-	public List<UserResponse> getAllUsers() {
-		return userRepository.findAll() // 1. Busca todos en la DB
-				.stream() // 2. Conviértelos a flujo de datos
-				.map(userMapper::toDto) // 3. Transforma cada Entity a Response (sin password)
-				.collect(Collectors.toList()); // 4. Empaquétalos en una lista
+	public Page<UserResponse> getAllUsers(Pageable pageable) {
+		Page<UserEntity> usersPage = userRepository.findAll(pageable);
+		return usersPage.map(userMapper::toDto);
 	}
 
 	public UserResponse createUser(UserRegisterRequest request) {

@@ -2,6 +2,9 @@ package com.bata.backend.modules.user.controllers;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,15 +33,15 @@ public class UserController {
 	public ResponseEntity<UserResponse> register(@RequestBody @Valid UserRegisterRequest request) {
 		return ResponseEntity.ok(userService.createUser(request));
 	}
-	
+
 	@GetMapping
-	public ResponseEntity<List<UserResponse>> getAll() {
-	    return ResponseEntity.ok(userService.getAllUsers());
+	public ResponseEntity<Page<UserResponse>> getAll(@PageableDefault(page = 0, size = 10) Pageable pageable) {
+		return ResponseEntity.ok(userService.getAllUsers(pageable));
 	}
-	
+
 	@PostMapping("/login")
-    public ResponseEntity<UserLoginResponse> login(@RequestBody @Valid UserLoginRequest request) {
-        return ResponseEntity.ok(userService.login(request));
-    }
+	public ResponseEntity<UserLoginResponse> login(@RequestBody @Valid UserLoginRequest request) {
+		return ResponseEntity.ok(userService.login(request));
+	}
 
 }
