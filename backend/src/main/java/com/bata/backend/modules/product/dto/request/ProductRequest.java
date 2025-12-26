@@ -25,6 +25,9 @@ public record ProductRequest(
 
 		@NotNull(message = "El material es obligatorio") 
 		Integer materialId,
+		
+		@NotNull(message = "El genero es obligatorio")
+		String gender,
 
 		List<ProductVariantRequest> variants) {
 
@@ -37,7 +40,7 @@ public record ProductRequest(
 			@Positive(message = "El stock debe ser positivo") 
 			Integer stock,
 
-			String imageUrl,
+			String imagenUrl,
 
 			BigDecimal priceModifier
 			) {}
