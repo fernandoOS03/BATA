@@ -47,6 +47,9 @@ public class SecurityConfig {
                 // Órdenes
                 .requestMatchers("/api/orders/**").authenticated()
                 
+                //para agregar imagenes
+                .requestMatchers("/api/media/upload").hasRole("ADMIN")
+                
                 // Todo lo demás
                 .anyRequest().authenticated()
             )
