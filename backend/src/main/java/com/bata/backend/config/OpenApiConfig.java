@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 		type = SecuritySchemeType.HTTP, 
 		bearerFormat = "JWT", //formato del token
 		in = SecuritySchemeIn.HEADER) // donde se envia
+
 public class OpenApiConfig {
 
 }
