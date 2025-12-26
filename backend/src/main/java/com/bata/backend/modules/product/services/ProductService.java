@@ -30,25 +30,28 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-	private final ProductRepository productRepository;
-	private final BrandRepository brandRepository;
-	private final CategoryRepository categoryRepository;
-	private final MaterialRepository materialRepository;
-	private final ColorRepository colorRepository;
-	private final SizeRepository sizeRepository;
+    private final ProductRepository productRepository;
+    private final BrandRepository brandRepository;
+    private final CategoryRepository categoryRepository;
+    private final MaterialRepository materialRepository;
+    private final ColorRepository colorRepository;
+    private final SizeRepository sizeRepository;
 
-	private final ProductMapper productMapper;
+    private final ProductMapper productMapper;
 
-	// =============================================================
-	// METODO PARA LISTAR TODOS (Para el catálogo público)
-	// =============================================================
-	public List<ProductResponse> getAllProducts() {
-		return productRepository.findAll().stream().map(productMapper::toDto).collect(Collectors.toList());
-	}
-	
-	// =============================================================
-		// METODO PARA MOSTAR UN PRODUCTO POR SU ID
-		// =============================================================
+    // =============================================================
+    // METODO PARA LISTAR TODOS (SOLO LOS ACTIVOS)
+    // =============================================================
+    public List<ProductResponse> getAllProducts() {
+        return productRepository.findByActiveTrue().stream()
+                .map(productMapper::toDto)
+                .collect(Collectors.toList());
+
+    }
+    
+    // =============================================================
+    // METODO PARA OBTENER POR ID
+    // =============================================================
     public ProductResponse getProductById(Integer id) {
         ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
@@ -56,73 +59,108 @@ public class ProductService {
         return productMapper.toDto(product);
     }
 
-	// =============================================================
-	// METODO PARA CREAR UN PRODUCTO CON SUS ENTIDADES
-	// =============================================================
-	@Transactional // si algo falla no guarda nada(Rooback)
-	public ProductResponse createProduct(ProductRequest request) {
-		// PASO 1: Convertir el request a Entidad base
-		ProductEntity product = productMapper.toEntity(request);
+    // =============================================================
+    // METODO PARA CREAR (Versión Limpia)
+    // =============================================================
+    @Transactional 
+    public ProductResponse createProduct(ProductRequest request) {
+        ProductEntity product = productMapper.toEntity(request);
+        
+        // Aseguramos que nazca activo (Soft Delete)
+        product.setActive(true); 
+        
+        // Usamos el método ayudante para no repetir código
+        assignRelationships(product, request);
 
-		// PASO 2: Buscar y asignar las relaciones "Padre" (Marca, Categoría, Material)
-		// Si no existen, lanzamos error para avisar al admin.
-		BrandEntity brand = brandRepository.findById(request.brandId())
-				.orElseThrow(() -> new ResourceNotFoundException("Marca no encontrada con ID: " + request.brandId()));
+        List<ProductVariantEntity> variantsList = new ArrayList<>();
+        for (ProductRequest.ProductVariantRequest variantReq : request.variants()) {
+            // Usamos el método ayudante para crear cada variante
+            variantsList.add(createVariantEntity(variantReq, product));
+        }
+        product.setProductsVariants(variantsList);
 
-		CategoryEntity category = categoryRepository.findById(request.categoryId())
-				.orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + request.categoryId()));
+        ProductEntity savedProduct = productRepository.save(product);
+        return productMapper.toDto(savedProduct);
+    }
 
-		MaterialEntity material = materialRepository.findById(request.materialId())
-				.orElseThrow(() -> new ResourceNotFoundException("Material no encontrado con ID: " + request.materialId()));
+    // =============================================================
+    // METODO PARA ACTUALIZAR
+    // =============================================================
+    @Transactional
+    public ProductResponse updateProduct(Integer id, ProductRequest request) {
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
 
-		product.setBrand(brand);
-		product.setCategory(category);
-		product.setMaterial(material);
+        // Actualizamos datos básicos
+        product.setName(request.name());
+        product.setDescription(request.description());
+        product.setBasePrice(request.basePrice());
 
-		// PASO 3: Procesar la lista de Variantes (Hijos)
-		// Creamos la lista vacía donde guardaremos las variantes procesadas
-		List<ProductVariantEntity> variantsList = new ArrayList<>();
+        // Reutilizamos la lógica de asignar relaciones
+        assignRelationships(product, request);
 
-		// Recorremos cada variante que envió el usuario
-		for (ProductRequest.ProductVariantRequest variantReq : request.variants()) {
+        // Lógica de reemplazo de variantes
+        if (product.getProductsVariants() != null) {
+            product.getProductsVariants().clear();
+        } else {
+            product.setProductsVariants(new ArrayList<>());
+        }
+        
+        for (ProductRequest.ProductVariantRequest variantReq : request.variants()) {
+            // Reutilizamos la lógica de crear variante
+            product.getProductsVariants().add(createVariantEntity(variantReq, product));
+        }
 
-			ProductVariantEntity variantEntity = new ProductVariantEntity();
+        ProductEntity updatedProduct = productRepository.save(product);
+        return productMapper.toDto(updatedProduct);
+    }
 
-			// a) Copiar datos simples
-			variantEntity.setStock(variantReq.stock());
-			variantEntity.setPriceModifier(variantReq.priceModifier());
-			variantEntity.setImagenUrl(variantReq.imageUrl()); // Asumiendo que agregaste este campo
+    // =============================================================
+    // METODO PARA ELIMINAR (SOFT DELETE)
+    // =============================================================
+    public void deleteProduct(Integer id) {
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
+        
+        // Apagamos el producto en lugar de borrarlo
+        product.setActive(false);
+        productRepository.save(product);
+    }
 
-			// b) Buscar Color y Talla
-			ColorEntity color = colorRepository.findById(variantReq.colorId())
-					.orElseThrow(() -> new ResourceNotFoundException("Color no encontrado ID: " + variantReq.colorId()));
+    // =============================================================
+    // MÉTODOS PRIVADOS DE AYUDA (Para evitar repetir código)
+    // =============================================================
+    
+    private void assignRelationships(ProductEntity product, ProductRequest request) {
+        BrandEntity brand = brandRepository.findById(request.brandId())
+                .orElseThrow(() -> new ResourceNotFoundException("Marca no encontrada ID: " + request.brandId()));
+        CategoryEntity category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada ID: " + request.categoryId()));
+        MaterialEntity material = materialRepository.findById(request.materialId())
+                .orElseThrow(() -> new ResourceNotFoundException("Material no encontrado ID: " + request.materialId()));
 
-			SizeEntity size = sizeRepository.findById(variantReq.sizeId())
-					.orElseThrow(() -> new ResourceNotFoundException("Talla no encontrada ID: " + variantReq.sizeId()));
+        product.setBrand(brand);
+        product.setCategory(category);
+        product.setMaterial(material);
+    }
 
-			variantEntity.setColor(color);
-			variantEntity.setSize(size);
+    private ProductVariantEntity createVariantEntity(ProductRequest.ProductVariantRequest variantReq, ProductEntity parentProduct) {
+        ProductVariantEntity variantEntity = new ProductVariantEntity();
+        
+        variantEntity.setStock(variantReq.stock());
+        variantEntity.setPriceModifier(variantReq.priceModifier());
+        // Asegúrate de usar el nombre correcto según tu Request (imagenUrl o imageUrl)
+        variantEntity.setImagenUrl(variantReq.imagenUrl()); 
 
-			// c) VINCULACIÓN BIDIRECCIONAL (Clave para que funcione el Cascade)
-			//Esto es obligatorio en JPA porque obliga a que las llaves foraneas se guarden correctamente
-			// Le decimos al hijo quién es su padre
-			variantEntity.setProduct(product);
+        ColorEntity color = colorRepository.findById(variantReq.colorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Color no encontrado ID: " + variantReq.colorId()));
+        SizeEntity size = sizeRepository.findById(variantReq.sizeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Talla no encontrada ID: " + variantReq.sizeId()));
 
-			// Agregamos a la lista temporal
-			variantsList.add(variantEntity);
-		}
+        variantEntity.setColor(color);
+        variantEntity.setSize(size);
+        variantEntity.setProduct(parentProduct);
 
-		// Le decimos al padre quiénes son sus hijos
-		product.setProductsVariants(variantsList);
-
-		// PASO 4: Guardar todo de un golpe
-		// Gracias a CascadeType.ALL, al guardar 'product' se guardan solas las
-		// variantes
-		ProductEntity savedProduct = productRepository.save(product);
-
-		// PASO 5: Convertir a DTO de respuesta y retornar
-		return productMapper.toDto(savedProduct);
-
-	}
-
+        return variantEntity;
+    }
 }
