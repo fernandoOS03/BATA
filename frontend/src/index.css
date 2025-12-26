@@ -1,3 +1,79 @@
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --brand-red: #ee2a2a;
+  --brand-red-dark: #d70000;
+  --text-primary: #212121;
+  --text-secondary: #616161;
+  --border-color: #dbdbdb;
+}
+
+@layer base {
+  body {
+    font-feature-settings: "kern" 1;
+  }
+}
+
+@layer components {
+  .discount-badge {
+    background: linear-gradient(135deg, #ee2a2a 0%, #b80000 100%);
+    color: white;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+  }
+  
+  .bata-input {
+    @apply w-full px-4 py-3 border border-neutral-300 rounded-sm 
+           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent 
+           transition-colors duration-200;
+  }
+  
+  .bata-btn-primary {
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-bold 
+           py-3 px-6 rounded-sm shadow-button transition-colors 
+           duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500 
+           focus:ring-offset-2;
+  }
+  
+  .bata-btn-secondary {
+    @apply bg-white border-2 border-brand-500 text-brand-600 
+           hover:bg-brand-50 font-bold py-3 px-6 rounded-sm 
+           transition-colors duration-200;
+  }
+  
+  .product-card {
+    @apply bg-white rounded-sm shadow-card overflow-hidden 
+           hover:shadow-lg transition-shadow duration-300;
+  }
+  
+  .form-checkbox:checked {
+    background-color: #ee2a2a;
+    border-color: #ee2a2a;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
