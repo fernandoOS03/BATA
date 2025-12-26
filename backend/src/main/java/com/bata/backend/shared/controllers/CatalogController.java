@@ -22,7 +22,7 @@ import com.bata.backend.modules.user.controllers.UserController;
 import com.bata.backend.shared.dto.request.CatalogRequest;
 import com.bata.backend.shared.dto.response.CatalogResponse;
 
-import org.springframework.web.bind.annotation.RequestBody; 
+import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,18 +31,16 @@ import lombok.RequiredArgsConstructor;
 public class CatalogController {
 
     private final UserController userController;
-	private final BrandRepository brandRepository;
-	private final CategoryRepository categoryRepository;
-	private final MaterialRepository materialRepository;
-	private final ColorRepository colorRepository;
-	private final SizeRepository sizeRepository;
+    private final BrandRepository brandRepository;
+    private final CategoryRepository categoryRepository;
+    private final MaterialRepository materialRepository;
+    private final ColorRepository colorRepository;
+    private final SizeRepository sizeRepository;
 
-
-    
     // =================================================================
     // 1. ENDPOINTS GET (LEER LISTAS)
     // =================================================================
-	
+
     @GetMapping("/brands")
     public ResponseEntity<List<CatalogResponse>> getAllBrands() {
         var list = brandRepository.findAll().stream()
@@ -50,7 +48,7 @@ public class CatalogController {
                 .toList();
         return ResponseEntity.ok(list);
     }
-       
+
     @GetMapping("/categories")
     public ResponseEntity<List<CatalogResponse>> getAllCategories() {
         var list = categoryRepository.findAll().stream()
@@ -78,57 +76,53 @@ public class CatalogController {
     @GetMapping("/sizes")
     public ResponseEntity<List<CatalogResponse>> getAllSizes() {
         var list = sizeRepository.findAll().stream()
-                .map(item -> new CatalogResponse(item.getId(), item.getName())) 
+                .map(item -> new CatalogResponse(item.getId(), item.getName()))
                 .toList();
         return ResponseEntity.ok(list);
     }
-    
+
     // =================================================================
     // 1. ENDPOINTS POST (CREAR NUEVOS)
     // =================================================================
-    
-   @PostMapping("/brands") 
-    public ResponseEntity<CatalogResponse> createBrand(@RequestBody CatalogRequest request){
-	   System.out.println("📦 JSON RAW RECIBIDO: " + request);
-    	BrandEntity entity = new BrandEntity();
-    	System.out.println("📦 CONTENIDO NAME: '" + request.name() + "'");
-    	entity.setName(request.name());
-    	BrandEntity saved = brandRepository.save(entity);
-    	return ResponseEntity.ok(new CatalogResponse(saved.getId(), saved.getName())); 	
+
+    @PostMapping("/brands")
+    public ResponseEntity<CatalogResponse> createBrand(@RequestBody CatalogRequest request) {
+        BrandEntity entity = new BrandEntity();
+        entity.setName(request.name());
+        BrandEntity saved = brandRepository.save(entity);
+        return ResponseEntity.ok(new CatalogResponse(saved.getId(), saved.getName()));
     }
-   @PostMapping("/categories")
-   public ResponseEntity<CatalogResponse> createCategory(@RequestBody CatalogRequest request) {
-       CategoryEntity entity = new CategoryEntity();
-       entity.setName(request.name());
-       CategoryEntity saved = categoryRepository.save(entity);
-       return ResponseEntity.ok(new CatalogResponse(saved.getId(), saved.getName()));
-   }
 
-   @PostMapping("/materials")
-   public ResponseEntity<CatalogResponse> createMaterial(@RequestBody CatalogRequest request) {
-       MaterialEntity entity = new MaterialEntity();
-       entity.setName(request.name());
-       MaterialEntity saved = materialRepository.save(entity);
-       return ResponseEntity.ok(new CatalogResponse(saved.getId(), saved.getName()));
-   }
+    @PostMapping("/categories")
+    public ResponseEntity<CatalogResponse> createCategory(@RequestBody CatalogRequest request) {
+        CategoryEntity entity = new CategoryEntity();
+        entity.setName(request.name());
+        CategoryEntity saved = categoryRepository.save(entity);
+        return ResponseEntity.ok(new CatalogResponse(saved.getId(), saved.getName()));
+    }
 
-   @PostMapping("/colors")
-   public ResponseEntity<CatalogResponse> createColor(@RequestBody CatalogRequest request) {
-       ColorEntity entity = new ColorEntity();
-       entity.setName(request.name());
-       ColorEntity saved = colorRepository.save(entity);
-       return ResponseEntity.ok(new CatalogResponse(saved.getId(), saved.getName()));
-   }
+    @PostMapping("/materials")
+    public ResponseEntity<CatalogResponse> createMaterial(@RequestBody CatalogRequest request) {
+        MaterialEntity entity = new MaterialEntity();
+        entity.setName(request.name());
+        MaterialEntity saved = materialRepository.save(entity);
+        return ResponseEntity.ok(new CatalogResponse(saved.getId(), saved.getName()));
+    }
 
-   @PostMapping("/sizes")
-   public ResponseEntity<CatalogResponse> createSize(@RequestBody CatalogRequest request) {
-       SizeEntity entity = new SizeEntity();
-       entity.setName(request.name());
-       SizeEntity saved = sizeRepository.save(entity);
-       return ResponseEntity.ok(new CatalogResponse(saved.getId(), saved.getName()));
-   }
-    
-    
-	
+    @PostMapping("/colors")
+    public ResponseEntity<CatalogResponse> createColor(@RequestBody CatalogRequest request) {
+        ColorEntity entity = new ColorEntity();
+        entity.setName(request.name());
+        ColorEntity saved = colorRepository.save(entity);
+        return ResponseEntity.ok(new CatalogResponse(saved.getId(), saved.getName()));
+    }
+
+    @PostMapping("/sizes")
+    public ResponseEntity<CatalogResponse> createSize(@RequestBody CatalogRequest request) {
+        SizeEntity entity = new SizeEntity();
+        entity.setName(request.name());
+        SizeEntity saved = sizeRepository.save(entity);
+        return ResponseEntity.ok(new CatalogResponse(saved.getId(), saved.getName()));
+    }
 
 }
