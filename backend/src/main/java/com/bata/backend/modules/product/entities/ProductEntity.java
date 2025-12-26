@@ -3,6 +3,8 @@ package com.bata.backend.modules.product.entities;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.bata.backend.modules.product.entities.enums.Gender;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,9 +27,16 @@ public class ProductEntity {
 
 	@Column(name = "base_price")
 	private BigDecimal basePrice;
+		
+	@Column(name = "active")
+	private Boolean active = true;
+	
+	@Enumerated(EnumType.STRING)
+	@Column (name = "gender")
+	private Gender gender;
 	
 	//====== Relacación con ProductVariant ====== 
-	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
 	List<ProductVariantEntity> productsVariants;
 	
 	//====== Relacaciones con tablas hijas ====== 
