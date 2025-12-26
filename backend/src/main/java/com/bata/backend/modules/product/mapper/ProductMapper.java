@@ -20,11 +20,21 @@ public interface ProductMapper {
 	@Mapping(target = "brand", source = "brand.name")
 	@Mapping(target = "category", source = "category.name") 
     @Mapping(target = "material", source = "material.name") 
+	
+	 @Mapping(target = "brandId", source = "brand.id")
+    @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "materialId", source = "material.id")
     @Mapping(target = "variants", source = "productsVariants")
 	ProductResponse toDto(ProductEntity entity);
 	
 	@Mapping(target = "color", source = "color.name")
     @Mapping(target = "size", source = "size.name")
+	
+    @Mapping(target = "colorId", source = "color.id")
+    @Mapping(target = "sizeId", source = "size.id")
+	
+    @Mapping(target = "imagenUrl", source = "imagenUrl") 
+
     ProductResponse.ProductVariantResponse toVariantDto(ProductVariantEntity variant);
 	
 	// ==========================================================

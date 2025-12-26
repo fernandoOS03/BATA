@@ -8,16 +8,29 @@ public record ProductResponse(
 	    String name,
 	    String description,
 	    BigDecimal basePrice,
+	    
+	    Integer brandId,
+        Integer categoryId,
+        Integer materialId,
+	    
 	    String brand,   
 	    String category, 
-	    String material, 
+	    String material,
+	    String gender,
 	    List<ProductVariantResponse> variants) {
 		public record ProductVariantResponse(
 		        Integer id,
+		        
+		        Integer colorId,
+	            Integer sizeId,
+	            
 		        String color, 
 		        String size,  
 		        Integer stock,
-		        String imageUrl,
+		        String imagenUrl,
+		        
+	            BigDecimal priceModifier, 
+
 		        BigDecimal finalPrice 
 		    ) {}
 }
