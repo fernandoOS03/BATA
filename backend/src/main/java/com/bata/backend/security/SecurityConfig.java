@@ -29,28 +29,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            // CAMBIO CLAVE 1: Enlazamos explícitamente tu configuración de CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
+            .csrf(csrf -> csrf.disable())
             
             .authorizeHttpRequests(auth -> auth
-                // Documentación Swagger
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 
-                // Auth
                 .requestMatchers("/api/users/register", "/api/users/login").permitAll()
                 
-                // Productos (GET Público, POST Admin)
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products").hasRole("ADMIN")
                 
-                // Órdenes
                 .requestMatchers("/api/orders/**").authenticated()
                 
-                //para agregar imagenes
                 .requestMatchers("/api/media/upload").hasRole("ADMIN")
                 
-                // Todo lo demás
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -60,21 +53,16 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // CAMBIO CLAVE 2: Renombramos el método a 'corsConfigurationSource'
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Orígenes permitidos (React y Angular/Otro)
         configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
         
-        // Métodos permitidos
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("*"));
         
-        // Cabeceras permitidas (Vital para que pase el Token)
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        
-        // Credenciales
+
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
