@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 
-// Hook separado y limpio
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {

@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { authServices } from '../../auth/services/auth.services';
 import { LayoutDashboard, ShoppingBag, Users, Settings, LogOut, Package, type LucideIcon } from 'lucide-react';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 interface MenuItem {
   path: string;
@@ -10,6 +10,7 @@ interface MenuItem {
 
 export const AdminLayout = () => {
   const location = useLocation();
+  const { logout } = useAuth();
 
   // Definición de las opciones del Panel de Control
   const menuItems: MenuItem[] = [
@@ -62,7 +63,7 @@ export const AdminLayout = () => {
         {/* Footer del Sidebar (Logout) */}
         <div className="p-4 border-t border-neutral-100">
           <button 
-            onClick={authServices.logout}
+            onClick={logout}
             className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-neutral-500 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors"
           >
             <LogOut size={18} />

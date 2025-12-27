@@ -20,6 +20,10 @@
 }
 
 @layer components {
+
+  .container-main {
+    @apply w-[98%] max-w-[1600px] mx-auto;
+  }
   .discount-badge {
     background: linear-gradient(135deg, #ee2a2a 0%, #b80000 100%);
     color: white;

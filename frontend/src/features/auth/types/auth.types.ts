@@ -30,7 +30,7 @@ export interface RegisterRequest {
 
 export interface AuthContextProps {
   user: User | null;
-  isAthenticated: boolean;
   login: (response: AuthResponse) => void;
   logout: () => void;
+  isAuthenticated: boolean;
 }

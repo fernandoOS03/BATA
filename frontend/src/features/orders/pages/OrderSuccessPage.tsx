@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation, Navigate } from 'react-router-dom'; // 👈 Importamos useLocation y Navigate
+import { Link, useLocation, Navigate } from 'react-router-dom'; 
 import { CheckCircle, ShoppingBag, Package } from 'lucide-react';
 
 export const OrderSuccessPage = () => {
@@ -52,7 +52,7 @@ export const OrderSuccessPage = () => {
 
         <div className="mt-8 pt-6 border-t border-neutral-100">
           <p className="text-[10px] text-neutral-400 uppercase tracking-wider">
-            {/* ✅ AQUI MOSTRAMOS EL ID REAL */}
+            {/*  AQUI HAY QE CAMBIAR POR EL ID REAL */}
             Orden ID: #{orderId} 
           </p>
         </div>

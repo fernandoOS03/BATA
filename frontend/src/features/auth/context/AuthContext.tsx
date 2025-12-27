@@ -12,7 +12,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
 
   // 1. ESTADO INICIAL
-  const [user, setUser] = useState<User | null>(() => authServices.getUser());
+  const [user, setUser] = useState<User | null>(() => {
+    // Solo restauramos el usuario si TAMBIÉN hay un token válido
+    if (authServices.isAuthenticated()) {
+        return authServices.getUser();
+    }
+    return null;
+  });
 
   // 2. FUNCIÓN LOGIN
   const login = (response: AuthResponse) => {
