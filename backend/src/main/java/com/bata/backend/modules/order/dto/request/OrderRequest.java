@@ -16,7 +16,7 @@ public record OrderRequest(
 		@JsonProperty("paymentMethod")
 		String paymentMethod, 
 
-		@NotEmpty(message = "El carrito no puede estar vacío") 
+		//@NotEmpty(message = "El carrito no puede estar vacío") 
 		@JsonProperty("items")
 		List<OrderItemRequest> items 
 		

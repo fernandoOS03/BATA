@@ -35,5 +35,10 @@ public class OrderController {
 		String userEmail = authentication.getName();
 		return ResponseEntity.ok(orderService.getMyOrders(userEmail));
 	}
+	
+	@GetMapping("/admin")
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
+    }
 
 }

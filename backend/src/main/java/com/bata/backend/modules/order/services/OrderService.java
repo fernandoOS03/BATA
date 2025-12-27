@@ -8,10 +8,11 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.bata.backend.modules.order.dto.request.OrderRequest;
 import com.bata.backend.exceptions.BadRequestException;
 import com.bata.backend.exceptions.ResourceNotFoundException;
-import com.bata.backend.modules.order.dto.request.OrderItemRequest;
+import com.bata.backend.modules.cart.entities.CartEntity;
+import com.bata.backend.modules.cart.repositories.CartRepository;
+import com.bata.backend.modules.order.dto.request.OrderRequest;
 import com.bata.backend.modules.order.dto.response.OrderResponse;
 import com.bata.backend.modules.order.entities.OrderEntity;
 import com.bata.backend.modules.order.entities.OrderItemEntity;
@@ -26,7 +27,8 @@ import com.bata.backend.modules.user.entities.LoginEntity;
 import com.bata.backend.modules.user.entities.UserEntity;
 import com.bata.backend.modules.user.repositories.AddressRepository;
 import com.bata.backend.modules.user.repositories.LoginRepository;
-import com.bata.backend.modules.user.repositories.UserRepository;
+import com.bata.backend.shared.email.EmailService;
+import com.bata.backend.shared.email.HtmlGenerator;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -34,113 +36,171 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-	private final OrderRepository orderRepository;
-	private final ProductVariantRepository productVariantRepository;
-	private final AddressRepository addressRepository;
-	private final PaymentRepository paymentRepository;
-	private final LoginRepository loginRepository;
-	private final OrderMapper orderMapper;
 
-	@Transactional // si algo falla, se cancela todo
-	public OrderResponse createOrder(OrderRequest request, String userEmail) {
+    // Repositorios Principales
+    private final OrderRepository orderRepository;
+    private final ProductVariantRepository productVariantRepository;
+    private final AddressRepository addressRepository;
+    private final PaymentRepository paymentRepository;
+    private final LoginRepository loginRepository;
+    private final CartRepository cartRepository; 
 
-		// ----- Buscamos quien comprara -----
-		LoginEntity login = loginRepository.findByEmail(userEmail)
-				.orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + userEmail));
-		UserEntity user = login.getUser();
+    // Mappers y Servicios Auxiliares
+    private final OrderMapper orderMapper;
+    private final EmailService emailService;      
+    private final HtmlGenerator htmlGenerator;
 
-		// ----- Buscamos la dirección -----
-		AddressEntity address = addressRepository.findById(request.addressId())
-				.orElseThrow(() -> new ResourceNotFoundException("Dirección no encontrada" + request.addressId()));
+    /**
+     * Proceso completo de Checkout:
+     * 1. Valida usuario y carrito.
+     * 2. Crea la orden.
+     * 3. Mueve items del carrito a la orden (validando stock y congelando precio).
+     * 4. Genera pago simulado.
+     * 5. Vacía el carrito.
+     * 6. Envía correo de confirmación.
+     */
+    @Transactional 
+    public OrderResponse createOrder(OrderRequest request, String userEmail) {
 
-		// ----- Iniciamos la orden -----
-		OrderEntity order = new OrderEntity();
-		order.setUser(user);
-		order.setUser(user);
-		order.setAddress(address);
-		order.setDate(LocalDateTime.now());
-		order.setStatus("PAID"); // cambiar el estado, se esta asuminedod que esta pagado
+        // 1. ----- BUSCAR USUARIO -----
+        LoginEntity login = loginRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + userEmail));
+        UserEntity user = login.getUser();
 
-		// ----- Procesar items y calcular totales
+        // 2. ----- OBTENER EL CARRITO REAL -----
+        // No usamos los items que vienen del frontend por seguridad. Usamos la BD.
+        CartEntity cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Carrito no encontrado para el usuario"));
 
-		List<OrderItemEntity> orderItems = new ArrayList<>();
-		BigDecimal totalAmount = BigDecimal.ZERO;
+        if (cart.getItems() == null || cart.getItems().isEmpty()) {
+            throw new BadRequestException("El carrito está vacío, no se puede procesar la compra");
+        }
 
-		for (OrderItemRequest itemReq : request.items()) {
+        // 3. ----- BUSCAR DIRECCIÓN -----
+        AddressEntity address = addressRepository.findById(request.addressId())
+                .orElseThrow(() -> new ResourceNotFoundException("Dirección no encontrada ID: " + request.addressId()));
 
-			// Primero buscamos la variante en la db
-			ProductVariantEntity variant = productVariantRepository.findById(itemReq.variantId())
-					.orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado ID: " + itemReq.variantId()));
+        // 4. ----- INICIAR LA CABECERA DE LA ORDEN -----
+        OrderEntity order = new OrderEntity();
+        order.setUser(user);
+        order.setAddress(address);
+        order.setDate(LocalDateTime.now());
+        order.setStatus("PAID"); // Estado inicial asumido como pagado
 
-			// Continuamos validando stocko
-			if (variant.getStock() < itemReq.quantity()) {
-				throw new BadRequestException("Stock insuficiente para: " + variant.getProduct().getName());
-			}
+        // 5. ----- PROCESAR ITEMS, VALIDAR STOCK Y CALCULAR TOTALES -----
+        List<OrderItemEntity> orderItems = new ArrayList<>();
+        BigDecimal totalAmount = BigDecimal.ZERO;
 
-			// Continuamos actualizando inventario
-			variant.setStock(variant.getStock() - itemReq.quantity());
-			productVariantRepository.save(variant);
+        // Iteramos sobre los items DEL CARRITO (CartEntity), no del Request
+        for (var cartItem : cart.getItems()) {
+            
+            // a) Obtener variante fresca de la BD
+            ProductVariantEntity variant = productVariantRepository.findById(cartItem.getVariant().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
-			// calculamos el precio base mas el modificador
-			BigDecimal basePrice = variant.getProduct().getBasePrice();
-			BigDecimal modifier = variant.getPriceModifier() != null ? variant.getPriceModifier() : BigDecimal.ZERO;
-			BigDecimal realPrice = basePrice.add(modifier);
+            // b) Validar Stock disponible
+            if (variant.getStock() < cartItem.getQuantity()) {
+                throw new BadRequestException("Stock insuficiente para: " + variant.getProduct().getName());
+            }
 
-			// Ahora pasamos crear el item
-			OrderItemEntity orderItem = new OrderItemEntity();
-			orderItem.setVariant(variant);
-			orderItem.setQuantity(itemReq.quantity());
-			orderItem.setPrice(realPrice);
-			orderItem.setOrder(order);
+            // c) Descontar Stock y guardar
+            variant.setStock(variant.getStock() - cartItem.getQuantity());
+            productVariantRepository.save(variant);
 
-			orderItems.add(orderItem);
+            // d) Calcular Precio Real (Base + Modificador)
+            BigDecimal basePrice = variant.getProduct().getBasePrice();
+            BigDecimal modifier = variant.getPriceModifier() != null ? variant.getPriceModifier() : BigDecimal.ZERO;
+            BigDecimal realPrice = basePrice.add(modifier);
 
-			// sumamos el precio total
-			BigDecimal subTotal = realPrice.multiply(new BigDecimal(itemReq.quantity()));
-			totalAmount = totalAmount.add(subTotal);
-		}
+            // e) Crear Item de Orden (Snapshot histórico)
+            OrderItemEntity orderItem = new OrderItemEntity();
+            orderItem.setVariant(variant);
+            orderItem.setQuantity(cartItem.getQuantity());
+            orderItem.setPrice(realPrice); // Guardamos precio histórico con setPrice()
+            orderItem.setOrder(order);
 
-		// Cerramos la orden
-		order.setOrderItems(orderItems);
-		order.setTotalAmount(totalAmount);
+            orderItems.add(orderItem);
 
-		// Guardamos la orden
-		OrderEntity savedOrder = orderRepository.save(order);
+            // f) Sumar al total general
+            BigDecimal subTotal = realPrice.multiply(new BigDecimal(cartItem.getQuantity()));
+            totalAmount = totalAmount.add(subTotal);
+        }
 
-		// 6. GENERAR PAGO (Simulado)
-		PaymentEntity payment = new PaymentEntity();
-		payment.setAmount(totalAmount);
-		payment.setPaymentMethod(request.paymentMethod());
-		payment.setStatus("COMPLETED");
-		payment.setTransactionId(UUID.randomUUID().toString()); // ID falso de Visa
-		payment.setOrder(savedOrder);
+        // Asignar items y total a la orden
+        order.setOrderItems(orderItems);
+        order.setTotalAmount(totalAmount);
 
-		paymentRepository.save(payment);
+        // Guardar la orden en BD (Esto genera el ID de la orden)
+        OrderEntity savedOrder = orderRepository.save(order);
 
-		// Actualizamos la orden con el pago para devolverla completa
-		savedOrder.setPayment(payment);
+        // 6. ----- GENERAR PAGO (Simulado) -----
+        PaymentEntity payment = new PaymentEntity();
+        payment.setAmount(totalAmount);
+        payment.setPaymentMethod(request.paymentMethod());
+        payment.setStatus("COMPLETED");
+        payment.setTransactionId(UUID.randomUUID().toString()); // ID falso tipo Visa
+        payment.setOrder(savedOrder);
 
-		return orderMapper.toDto(savedOrder);
-	}
+        paymentRepository.save(payment);
 
-	public List<OrderResponse> getMyOrders(String userEmail) {
+        // Actualizamos la orden con el pago para devolverla completa
+        savedOrder.setPayment(payment);
 
-		// ---- Recuperamos el usuario ----
-		LoginEntity login = loginRepository.findByEmail(userEmail)
-				.orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+        // 7. ----- VACIAR EL CARRITO -----
+        // Como ya se compró, el carrito debe quedar limpio
+        cart.getItems().clear();
+        cartRepository.save(cart);
 
-		UserEntity user = login.getUser();
-		if (user == null)
-			throw new BadRequestException("Perfil de usuario no configurado");
+        // 8. ----- ENVIAR CORREO (Try-Catch) -----
+        // Usamos un bloque try-catch para que, si falla el servidor de correos,
+        // la venta NO se cancele (porque ya se cobró y se descontó stock).
+        try {
+            String htmlReceipt = htmlGenerator.generateReceiptHtml(savedOrder);
+            // Asegúrate de castear el ID a Long si tu método sendOrderConfirmation pide Long, o Integer si pide Integer
+            emailService.sendOrderConfirmation(
+                userEmail, 
+                user.getName(), 
+                Long.valueOf(savedOrder.getId()), // Convertimos ID a Long si es necesario
+                htmlReceipt
+            );
+        } catch (Exception e) {
+            System.err.println("Advertencia: No se pudo enviar el correo de confirmación: " + e.getMessage());
+        }
 
-		// ----Buscamos sus pedidos ----
-		List<OrderEntity> orders = orderRepository.findByUserId(user.getId());
+        // 9. ----- RETORNAR DTO -----
+        return orderMapper.toDto(savedOrder);
+    }
 
-		// Tenemos que convertir la lista de entidades a dto usando mapper
-		return orders.stream()
-				.map(orderMapper::toDto)
-				.toList();
+    /**
+     * Obtiene el historial de compras de un usuario.
+     */
+    public List<OrderResponse> getMyOrders(String userEmail) {
 
-	}
+        // ---- Recuperamos el usuario ----
+        LoginEntity login = loginRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        UserEntity user = login.getUser();
+        if (user == null) {
+            throw new BadRequestException("Perfil de usuario no configurado");
+        }
+
+        // ---- Buscamos sus pedidos ----
+        List<OrderEntity> orders = orderRepository.findByUserId(user.getId());
+
+        // ---- Convertimos a DTO ----
+        return orders.stream()
+                .map(orderMapper::toDto)
+                .toList();
+    }
+    
+    /**
+     * Obtiene todas las ventas (Para panel Admin).
+     */
+    public List<OrderResponse> getAllOrders() {
+        return orderRepository.findAll().stream()
+                .map(orderMapper::toDto)
+                .toList();
+    }
 
 }
