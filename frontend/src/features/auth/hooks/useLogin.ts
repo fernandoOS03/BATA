@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { authServices } from "../services/auth.services";
 import type { LoginRequest } from "../types/auth.types";
+import { useAuth } from "./useAuth";
 
 export const useLogin = () => {
-  const navigate = useNavigate();
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,14 +27,7 @@ export const useLogin = () => {
 
     try {
       const response = await authServices.login(credentials);
-      authServices.saveSession(response);
-
-      // Redirección inteligente basada en el rol
-      if (response.user.role === "ADMIN") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/");
-      }
+      login(response);
     } catch (err) {
       console.error(err);
       setError("Credenciales incorrectas o error de conexión.");
