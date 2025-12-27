@@ -1,160 +1,148 @@
-import { useState, useEffect, useMemo } from "react";
-import { productService } from "../services/shop.service";
-import type { Product, Variant } from "../../../shared/types/product.types";
-import { toast } from "sonner";
-import { useCart } from "../context/CartContext";
-import { CartNotification } from "../components/CartNotification";
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { productService } from '../services/shop.service';
+import { useCart } from '../../cart/hooks/useCart';
+import type { Product } from '../../../shared/types/product.types';
 
-export const useProductDetail = (idString?: string) => {
-  // === 1. ESTADOS ===
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const useProductDetail = (productId: string | undefined) => {
+    const navigate = useNavigate();
+    const { addToCart } = useCart(); 
+    // Estados principales
+    const [product, setProduct] = useState<Product | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+    // Estados de selección del usuario
+    const [selectedColor, setSelectedColor] = useState<string | null>(null);
+    const [selectedSize, setSelectedSize] = useState<string | null>(null);
+    
+    // Estado local para UI loading
+    const [addingToCart, setAddingToCart] = useState(false); 
 
-  const { addToCart } = useCart();
+    // 1. CARGAR DATOS
+    useEffect(() => {
+        if (!productId) return;
+        
+        const fetchProduct = async () => {
+            try {
+                setLoading(true);
+                // Convertimos el ID a número porque el servicio lo espera así
+                const data = await productService.getProductById(Number(productId));
+                setProduct(data);
+                
+                if (data.variants.length > 0) {
+                    const firstColor = data.variants[0].color;
+                    setSelectedColor(firstColor);
+                }
+            } catch (err) {
+                console.error(err);
+                setError('No se pudo cargar el producto');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-  // === 2. EFECTOS (CARGA DE DATOS) ===
-  useEffect(() => {
-    if (!idString) return;
-    const loadProduct = async () => {
-      try {
-        setLoading(true);
-        const data = await productService.getProductById(Number(idString));
-        setProduct(data);
+        fetchProduct();
+    }, [productId]);
 
-        // Pre-selección: Primer color disponible
-        if (data.variants?.length > 0) {
-          setSelectedColor(data.variants[0].color);
-        }
-      } catch (err) {
-        console.error(err);
-        setError("No se pudo cargar el producto.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadProduct();
-  }, [idString]);
-
-  // === 3. LÓGICA DE NEGOCIO (MEMOS Y HELPERS) ===
-
-  // Colores Únicos
-  const uniqueColors = useMemo(() => {
-    if (!product?.variants) return [];
-    const seen = new Set<string>();
-    const options: { name: string; thumbnail: string }[] = [];
-
-    product.variants.forEach((v) => {
-      if (!seen.has(v.color)) {
-        seen.add(v.color);
-        options.push({
-          name: v.color,
-          thumbnail: v.imagenUrl,
+    // 2. LÓGICA DERIVADA
+    const uniqueColors = useMemo(() => {
+        if (!product) return [];
+        const map = new Map();
+        product.variants.forEach(v => {
+            if (!map.has(v.color)) {
+                map.set(v.color, {
+                    name: v.color,
+                    thumbnail: v.imagenUrl // || product.imageUrl (Product no tiene imageUrl segun type)
+                });
+            }
         });
-      }
-    });
-    return options;
-  }, [product]);
+        return Array.from(map.values());
+    }, [product]);
 
-  // Tallas Únicas
-  const allSizes = useMemo(() => {
-    if (!product?.variants) return [];
-    const sizes = Array.from(new Set(product.variants.map((v) => v.size)));
-    return sizes.sort((a, b) => Number(a) - Number(b));
-  }, [product]);
+    const allSizes = useMemo(() => {
+        if (!product) return [];
+        const sizes = new Set(product.variants.map(v => v.size));
+        return Array.from(sizes).sort((a, b) => Number(a) - Number(b));
+    }, [product]);
 
-  // Verificar Disponibilidad
-  const isSizeAvailableForColor = (size: string) => {
-    if (!selectedColor || !product) return false;
-    return product.variants.some(
-      (v) => v.color === selectedColor && v.size === size && v.stock > 0
-    );
-  };
+    const selectedVariant = useMemo(() => {
+        if (!product || !selectedColor || !selectedSize) return null;
+        return product.variants.find(v => 
+            v.color === selectedColor && 
+            v.size === selectedSize
+        );
+    }, [product, selectedColor, selectedSize]);
 
-  // Detectar Variante Exacta
-  useEffect(() => {
-    if (product && selectedColor && selectedSize) {
-      const variant = product.variants.find(
-        (v) => v.color === selectedColor && v.size === selectedSize
-      );
-      setSelectedVariant(variant || null);
-    } else {
-      setSelectedVariant(null);
-    }
-  }, [selectedColor, selectedSize, product]);
+    const currentPrice = useMemo(() => {
+        if (!product) return 0;
+        let price = product.basePrice;
+        if (selectedVariant && selectedVariant.priceModifier) {
+            price += selectedVariant.priceModifier;
+        }
+        return price;
+    }, [product, selectedVariant]);
 
-  // Helper para cambiar color y limpiar talla
-  const handleColorSelect = (color: string) => {
-    setSelectedColor(color);
-    setSelectedSize(null);
-  };
+    const currentImage = useMemo(() => {
+        if (!product) return '';
+        if (selectedVariant?.imagenUrl) return selectedVariant.imagenUrl;
+        if (selectedColor) {
+            const variantWithColor = product.variants.find(v => v.color === selectedColor);
+            if (variantWithColor?.imagenUrl) return variantWithColor.imagenUrl;
+        }
+        return ''; // product.imageUrl no existe en el tipo
+    }, [product, selectedVariant, selectedColor]);
 
-  // Datos Visuales Actuales
-  const currentImage =
-    selectedVariant?.imagenUrl ||
-    product?.variants.find((v) => v.color === selectedColor)?.imagenUrl ||
-    product?.variants?.[0]?.imagenUrl ||
-    "";
+    // 3. FUNCIONES DE ACCIÓN
+    const isSizeAvailableForColor = (sizeName: string) => {
+        if (!product || !selectedColor) return false;
+        const variant = product.variants.find(v => 
+            v.color === selectedColor && 
+            v.size === sizeName
+        );
+        return variant ? variant.stock > 0 : false;
+    };
 
-  const currentPrice = selectedVariant?.finalPrice || product?.basePrice || 0;
+    const handleColorSelect = (colorName: string) => {
+        setSelectedColor(colorName);
+        setSelectedSize(null); 
+    };
 
-  // === 4. MANEJADORES DE EVENTOS (HANDLERS) ===
+   const handleAddToCart = async () => {
+    if (!selectedVariant || !product) return false;
 
-  const handleAddToCart = () => {
-    // A. Validaciones
-    if (!product) return;
-
-    if (!selectedVariant) {
-      toast.error("Por favor, selecciona una talla.", {
-        position: "top-right",
-      });
-      return;
-    }
-
-    if (selectedVariant.stock <= 0) {
-      toast.error("Lo sentimos, este producto está agotado.", {
-        position: "top-right",
-      });
-      return;
+    const token = localStorage.getItem('token');
+    if (!token) {
+        navigate('/auth/login');
+        return false;
     }
 
-    // B. Acción (Contexto)
-    addToCart(product, selectedVariant);
-
-    // C. Feedback (Notificación Personalizada)
-    toast.custom(
-      (t) => (
-        <CartNotification
-          product={product}
-          variant={selectedVariant}
-          onDismiss={() => toast.dismiss(t)}
-        />
-      ),
-      {
-        duration: 5000,
-        position: "top-right",
-      }
-    );
-  };
-
-  return {
-    product,
-    loading,
-    error,
-    selectedColor,
-    handleColorSelect,
-    selectedSize,
-    setSelectedSize,
-    selectedVariant,
-    uniqueColors,
-    allSizes,
-    isSizeAvailableForColor,
-    currentImage,
-    currentPrice,
-    handleAddToCart,
-  };
+    try {
+        setAddingToCart(true);
+        await addToCart(product, selectedVariant);
+        return true; 
+    } catch (err) {
+        console.error(err);
+        return false;
+    } finally {
+        setAddingToCart(false);
+    }
+};
+    return {
+        product,
+        loading,
+        error,
+        selectedColor,
+        handleColorSelect,
+        selectedSize,
+        setSelectedSize,
+        selectedVariant,
+        uniqueColors,
+        allSizes,
+        isSizeAvailableForColor,
+        currentImage,
+        currentPrice,
+        handleAddToCart,
+        addingToCart // <--- ESTO ES LO QUE TE FALTA EN EL RETURN
+    };
 };

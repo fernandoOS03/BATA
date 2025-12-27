@@ -1,57 +1,43 @@
 import { ProductCard } from '../components/ProductCard';
-import type { Product } from '../../../shared/types/product.types';
-
-// Datos de prueba (luego vendrán de una API o servicio)
-// Puedes mover esto a un archivo separado si prefieres
-const dummyProducts: Product[] = [
-  {
-    id: 1,
-    name: "Zapatilla Urbana",
-    description: "Zapatilla cómoda para el día a día",
-    basePrice: 150.00,
-    brand: "Bata",
-    category: "Urbano",
-    material: "Cuero sintético",
-    variants: [
-      {
-        id: 101,
-        color: "Negro",
-        size: "40",
-        stock: 10,
-        imagenUrl: "https://via.placeholder.com/200",
-        finalPrice: 150.00
-      }
-    ]
-  },
-   {
-    id: 2,
-    name: "Zapato Formal",
-    description: "Elegancia y confort",
-    basePrice: 280.00,
-    brand: "Bata",
-    category: "Formal",
-    material: "Cuero",
-    variants: [
-      {
-        id: 201,
-        color: "Marron",
-        size: "42",
-        stock: 0, // Agotado
-        imagenUrl: "",
-        finalPrice: 280.00
-      }
-    ]
-  }
-];
+import { useProducts } from '../hooks/useProducts';
 
 export const ProductListPage = () => {
+  const { products, loading, error } = useProducts();
+
+  if (loading) return (
+    <div className="min-h-[60vh] flex items-center justify-center text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em]">
+      Cargando catálogo...
+    </div>
+  );
+
+  if (error) return <div className="p-10 text-center text-[#ee2a2a] font-bold uppercase text-xs">{error}</div>;
+
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Nuestros Productos</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {dummyProducts.map(product => (
+    /* USAMOS w-full para que ocupe el 100% del espacio disponible.
+       El padding lateral (px-2) evita que las cards toquen el borde físico del celular.
+    */
+    <div className="w-full py-6 px-2 md:px-4 lg:px-0">
+      
+      {/* Título alineado al inicio del grid */}
+      <h1 className="text-xl md:text-2xl font-black text-neutral-900 uppercase tracking-tighter mb-8 italic">
+        Nuevos Lanzamientos
+      </h1>
+      
+      {/* GRID FLUIDO: 
+          - 2 columnas fijas en móvil (grid-cols-2)
+          - 4 columnas fijas desde tablets/escritorio (lg:grid-cols-4)
+          - gap-px y bg-neutral-100 crea esas líneas divisorias finas estilo catálogo premium
+      */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-12">
+        {products.length > 0 ? (
+          products.map((product) => (
             <ProductCard key={product.id} product={product} />
-        ))}
+          ))
+        ) : (
+          <p className="col-span-full text-center py-20 text-neutral-400 uppercase text-[10px] font-bold tracking-widest">
+            No se encontraron productos.
+          </p>
+        )}
       </div>
     </div>
   );

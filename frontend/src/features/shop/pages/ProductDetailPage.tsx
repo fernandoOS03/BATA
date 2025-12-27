@@ -1,139 +1,194 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { toast } from 'sonner';
-import { ShoppingCart } from 'lucide-react';
-import { shopService } from '../services/shop.service';
-import type { Product, Variant } from '../../../shared/types/product.types';
-
+import { useParams, Link } from 'react-router-dom';
+import { ShoppingBag, Check, AlertCircle, ChevronRight } from 'lucide-react';
+// Asegúrate de que la ruta al hook sea la correcta según tu estructura
+import { useProductDetail } from '../hooks/useProductDetail';
 export const ProductDetailPage = () => {
-  const { id } = useParams(); // Obtenemos el ID de la URL (ej: /product/1)
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+  // 1. Obtenemos el ID de la URL (definido como /product/:id en el router)
+  const { id } = useParams();
 
-  // Estados para la selección del usuario
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  // 2. LLAMADA ÚNICA AL HOOK: Traemos todo el cerebro del componente aquí
+  const {
+    product,
+    loading,
+    error,
+    selectedColor,
+    handleColorSelect, 
+    selectedSize,
+    setSelectedSize,
+    selectedVariant,
+    uniqueColors,
+    allSizes,
+    isSizeAvailableForColor,
+    currentImage,
+    currentPrice,
+    handleAddToCart,
+  } = useProductDetail(id);
 
-  useEffect(() => {
-    if (id) loadProduct(Number(id));
-  }, [id]);
+  // 3. Estados de Carga y Error
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-neutral-500 font-bold uppercase tracking-widest">
+        Cargando...
+      </div>
+    );
+  }
 
-  // Cada vez que cambie la selección, buscamos si existe esa variante exacta
-  useEffect(() => {
-    if (product && selectedColor && selectedSize) {
-      const found = product.variants.find(
-        v => v.color === selectedColor && v.size === selectedSize
-      );
-      setSelectedVariant(found || null);
-    }
-  }, [selectedColor, selectedSize, product]);
-
-  const loadProduct = async (productId: number) => {
-    try {
-      setLoading(true);
-      const data = await shopService.getById(productId);
-      setProduct(data);
-    } catch (error) {
-      console.error(error);
-      toast.error('Error al cargar el producto');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddToCart = () => {
-    if (!selectedVariant) return;
-    toast.success(`Agregado: ${product?.name} (${selectedColor}, ${selectedSize})`);
-    // AQUÍ CONECTAREMOS EL CARRITO MÁS ADELANTE
-    console.log("Agregando variante ID:", selectedVariant.id);
-  };
-
-  if (loading) return <div>Cargando...</div>;
-  if (!product) return <div>Producto no encontrado</div>;
-
-  // Extraemos listas únicas de colores y tallas disponibles para los botones
-  const colors = Array.from(new Set(product.variants.map(v => v.color)));
-  const sizes = Array.from(new Set(product.variants.map(v => v.size)));
+  if (error || !product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-[#ee2a2a] gap-2">
+        <AlertCircle /> {error || "Producto no encontrado"}
+      </div>
+    );
+  }
 
   return (
-    <div className="container-main py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      
+      {/* === 1. BREADCRUMBS (MIGAS DE PAN) === */}
+      <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold text-neutral-400 uppercase tracking-widest mb-8">
+          <Link to="/" className="hover:text-black transition-colors">HOMBRE</Link>
+          <ChevronRight size={10} />
+          <Link to="/" className="hover:text-black transition-colors">ZAPATOS</Link>
+          <ChevronRight size={10} />
+          {/* Categoría dinámica del producto */}
+          <span className="text-[#ee2a2a]">{product.category}</span> 
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         
-        {/* 1. IMAGEN */}
-        <div className="bg-gray-100 rounded-xl aspect-square flex items-center justify-center overflow-hidden">
-          {/* Mostramos la foto de la variante seleccionada, o la primera por defecto */}
-          <img 
-            src={selectedVariant?.imagenUrl || product.variants[0].imagenUrl} 
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
+        {/* === COLUMNA IZQUIERDA: IMAGEN PRINCIPAL === */}
+        <div className="relative">
+            <div className="bg-[#f6f6f6] rounded-sm overflow-hidden aspect-square flex items-center justify-center group">
+                <img 
+                    src={currentImage} 
+                    alt={product.name}
+                    className="object-cover w-full h-full mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/600?text=No+Image"; }}
+                />
+            </div>
         </div>
 
-        {/* 2. DETALLES Y SELECCIÓN */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-          <p className="text-lg text-gray-500 mb-4">{product.description}</p>
+        {/* === COLUMNA DERECHA: INFORMACIÓN Y ACCIONES === */}
+        <div className="flex flex-col">
           
-          <div className="text-3xl font-bold text-brand-600 mb-6">
-            S/ {product.basePrice.toFixed(2)}
+          {/* Encabezado del Producto */}
+          <div className="mb-4">
+              <span className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-1 block">
+                  {product.brand}
+              </span>
+              <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-2 leading-tight">
+                  {product.name}
+              </h1>
+              <div className="text-2xl font-bold text-neutral-900">
+                 S/ {currentPrice.toFixed(2)}
+              </div>
           </div>
 
-          {/* Selector de Color */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Color</h3>
-            <div className="flex gap-2">
-              {colors.map(color => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors
-                    ${selectedColor === color 
-                      ? 'border-brand-500 text-brand-600 bg-brand-50' 
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
-                >
-                  {color}
-                </button>
-              ))}
-            </div>
-          </div>
+          <div className="h-px w-full bg-neutral-200 my-6"></div>
 
-          {/* Selector de Talla */}
+          {/* === 2. SELECTOR DE COLOR === */}
           <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Talla</h3>
-            <div className="flex gap-2">
-              {sizes.map(size => (
+            <span className="text-xs font-bold text-neutral-900 uppercase tracking-widest mb-3 block">
+                Color: <span className="text-neutral-500 font-medium">{selectedColor}</span>
+            </span>
+            <div className="flex flex-wrap gap-3">
+              {uniqueColors.map((option) => (
                 <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors
-                    ${selectedSize === size 
-                      ? 'border-brand-500 text-brand-600 bg-brand-50' 
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                  key={option.name}
+                  onClick={() => handleColorSelect(option.name)} // ✅ Usamos la función que limpia la talla
+                  className={`w-16 h-16 p-1 border rounded transition-all
+                    ${selectedColor === option.name 
+                      ? 'border-neutral-900 ring-1 ring-neutral-900' // Seleccionado: Borde negro
+                      : 'border-neutral-200 hover:border-neutral-400'
+                    }`}
+                  title={option.name}
                 >
-                  {size}
+                    <img 
+                        src={option.thumbnail} 
+                        alt={option.name} 
+                        className="w-full h-full object-cover bg-neutral-100"
+                    />
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Botón de Acción */}
-          <button 
-            onClick={handleAddToCart}
-            disabled={!selectedVariant || selectedVariant.stock === 0}
-            className="btn btn-primary w-full py-4 text-lg"
+          {/* === 3. SELECTOR DE TALLAS === */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-3">
+                <span className="text-xs font-bold text-neutral-900 uppercase tracking-widest">
+                    Talla
+                </span>
+                <button className="text-[10px] font-bold text-neutral-500 underline hover:text-black flex items-center gap-1">
+                    GUÍA DE TALLAS
+                </button>
+            </div>
+            
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+               {allSizes.map((size) => {
+                   const isAvailable = isSizeAvailableForColor(size);
+                   const isSelected = selectedSize === size;
+
+                   return (
+                    <button
+                      key={size}
+                      disabled={!isAvailable}
+                      onClick={() => setSelectedSize(size)}
+                      className={`h-12 flex items-center justify-center border text-sm font-bold transition-all relative
+                        ${isSelected
+                          ? 'border-[#ee2a2a] text-[#ee2a2a] ring-1 ring-[#ee2a2a]' // Seleccionado: Rojo
+                          : isAvailable 
+                            ? 'border-neutral-200 text-neutral-700 hover:border-neutral-400' // Disponible
+                            : 'border-neutral-100 text-neutral-300 bg-neutral-50 cursor-not-allowed decoration-slice line-through' // Agotado
+                        }`}
+                    >
+                      {size}
+                      {/* Indicador visual de selección */}
+                      {isSelected && (
+                          <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#ee2a2a] rounded-full"></span>
+                      )}
+                    </button>
+                  );
+               })}
+            </div>
+            {/* Mensaje de ayuda si no hay color seleccionado */}
+            {!selectedColor && (
+                <p className="text-[10px] text-neutral-400 mt-2">* Selecciona un color para ver la disponibilidad real.</p>
+            )}
+          </div>
+
+          {/* === BOTÓN DE ACCIÓN (AGREGAR AL CARRITO) === */}
+          <button
+            disabled={!selectedVariant} // Se desactiva si no hay variante válida (color+talla+stock)
+            onClick={handleAddToCart}   // Llama a la función del hook
+            className={`w-full py-4 px-8 text-sm font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 group
+              ${selectedVariant 
+                ? 'bg-black text-white hover:bg-neutral-800 shadow-lg cursor-pointer' 
+                : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+              }`}
           >
-            <ShoppingCart className="w-6 h-6" />
-            {selectedVariant 
-              ? (selectedVariant.stock > 0 ? 'Añadir al Carrito' : 'Sin Stock') 
-              : 'Selecciona color y talla'}
+            {selectedVariant ? (
+                <>
+                  <ShoppingBag size={18} className="group-hover:-translate-y-0.5 transition-transform"/>
+                  AGREGAR AL CARRITO
+                </>
+            ) : (
+                'SELECCIONA TUS OPCIONES'
+            )}
           </button>
+
+          {/* Información Adicional (Beneficios) */}
+          <div className="mt-6 flex flex-col gap-3 text-xs text-neutral-500">
+             <div className="flex items-center gap-2">
+                 <Check size={14} className="text-green-600"/>
+                 <span>Devoluciones gratis en tiendas Bata</span>
+             </div>
+             <div className="flex items-center gap-2">
+                 <ShoppingBag size={14} />
+                 <span>Recíbelo en 2-5 días hábiles</span>
+             </div>
+          </div>
           
-          {selectedVariant && (
-            <p className="mt-2 text-sm text-gray-500">
-              Stock disponible: {selectedVariant.stock} unidades
-            </p>
-          )}
         </div>
       </div>
     </div>
