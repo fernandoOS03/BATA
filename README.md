@@ -27,13 +27,36 @@
 
 ## 📸 Galería del Proyecto
 
-| Landing Page (Home) | Detalle de Producto |
+### 🏠 Landing & Autenticación
+| Landing Page | Login |
 |:---:|:---:|
-| <img src="./assets/demo-home.png" width="400" alt="Home Page"/> | <img src="./assets/demo-product.png" width="400" alt="Product Detail"/> |
+| <img src="./assets/home-page.png" width="380" alt="Landing Page"/> | <img src="./assets/login.png" width="380" alt="Login"/> |
 
-| Panel Administrativo | Automatización QA |
+| Registro | Perfil de Usuario |
 |:---:|:---:|
-| <img src="./assets/demo-admin.png" width="400" alt="Admin Dashboard"/> | <img src="./assets/demo-automation.png" width="400" alt="Automation Scripts"/> |
+| <img src="./assets/register.png" width="380" alt="Register"/> | <img src="./assets/user-profile.png" width="380" alt="User Profile"/> |
+
+---
+
+### 🛒 Experiencia de Usuario (E-commerce)
+| Lista de Productos | Detalle de Producto |
+|:---:|:---:|
+| <img src="./assets/product-list-user.png" width="380" alt="Product List"/> | <img src="./assets/product-detail-user.png" width="380" alt="Product Detail"/> |
+
+| Carrito | Detalle del Carrito |
+|:---:|:---:|
+| <img src="./assets/cart.png" width="380" alt="Cart"/> | <img src="./assets/cart-detail.png" width="380" alt="Cart Detail"/> |
+
+| Página 404 | — |
+|:---:|:---:|
+| <img src="./assets/404.png" width="380" alt="404 Page"/> | — |
+
+---
+
+### 🛠️ Panel Administrativo & Base de Datos
+| Panel Administrativo | Base de Datos |
+|:---:|:---:|
+| <img src="./assets/demo-admin.png" width="380" alt="Admin Dashboard"/> | <img src="./assets/demo-automation.png" width="380" alt="Database / Automation"/> |
 
 ---
 
@@ -63,11 +86,11 @@ Estructura **Feature-based** para modularidad.
 ### Core
 * **Lenguajes:** Java 21, TypeScript, SQL.
 * **Frameworks:** Spring Boot 3, React 18.
-* **Base de Datos:** MySQL (Relacional).
+* **Base de Datos:** MySQL.
 
 ### DevOps & Tools
 * **Control de Versiones:** Git & GitHub (Flujo Gitflow).
-* **Contenedores:** Docker (Opcional/Futuro).
+* **Contenedores:** Docker (Futuro).
 * **API Testing:** Postman / Swagger UI.
 ---
 

@@ -1,24 +1,53 @@
-# Logs
-logs
+--- JAVA / SPRING BOOT ---
+
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend//*.class
+backend/.settings/
+backend/.classpath
+backend/.project
+backend/.metadata/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!/src/main//target/
+!/src/test/**/target/
 
-node_modules
-dist
-dist-ssr
-*.local
+STS
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+VS Code
+
+.vscode/
+
+--- REACT / NODE (Frontend) ---
+
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/.eslintcache
+
+--- SISTEMA ---
+
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+/.metadata/
