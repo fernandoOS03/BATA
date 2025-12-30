@@ -56,7 +56,7 @@
 ### 🛠️ Panel Administrativo & Base de Datos
 | Panel Administrativo | Base de Datos |
 |:---:|:---:|
-| <img src="./assets/demo-admin.png" width="380" alt="Admin Dashboard"/> | <img src="./assets/demo-automation.png" width="380" alt="Database / Automation"/> |
+| <img src="./assets/dashboard-admin.png" width="380" alt="Admin Dashboard"/> | <img src="./assets/database.png" width="380" alt="Database"/> |
 
 ---
 
