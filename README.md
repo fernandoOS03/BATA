@@ -1,106 +1,156 @@
 <div align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Bata_logo.svg" alt="Bata Logo" width="200"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Bata_logo.svg" alt="Bata Logo" width="180"/>
   <br/>
-  <br/>
+  <h1>👟 Bata Enterprise Replica</h1>
+  <h3>Full Stack E-commerce Solution</h3>
 
-  # Bata Enterprise Replica - Full Stack E-commerce
-  
-  **Arquitectura Escalable | Seguridad Robusta | Automatización QA**
+  <p>
+    <b>Arquitectura Escalable</b> • <b>Seguridad JWT</b> • <b>Automatización QA</b> • <b>Headless Commerce</b>
+  </p>
 
-  [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.java.com/)
-  [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.0-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
-  [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-  [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
-
+  <p>
+    <a href="https://www.java.com/">
+      <img src="https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java"/>
+    </a>
+    <a href="https://spring.io/projects/spring-boot">
+      <img src="https://img.shields.io/badge/Spring_Boot-3.0-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" alt="Spring Boot"/>
+    </a>
+    <a href="https://reactjs.org/">
+      <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React"/>
+    </a>
+    <a href="https://www.typescriptlang.org/">
+      <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
+    </a>
+    <a href="https://www.mysql.com/">
+      <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL"/>
+    </a>
+  </p>
 </div>
 
----
+<br/>
 
-## 🚀 Visión General del Proyecto
-
-**Bata Enterprise Replica** es una solución integral de comercio electrónico diseñada para simular operaciones de retail a gran escala. Este proyecto no es solo una tienda online; es una demostración de ingeniería de software avanzada que abarca desde la gestión transaccional en el Backend hasta una experiencia de usuario optimizada en el Frontend, validada mediante pipelines de automatización.
-
-> **Nota:** Este es un proyecto académico/profesional desarrollado con fines educativos y de demostración técnica.
+> **🚧 Nota:** Este proyecto es una simulación académica/profesional diseñada para demostrar competencias avanzadas en ingeniería de software, replicando la lógica de negocio de un retail a gran escala.
 
 ---
 
-## 📸 Galería del Proyecto
+## 📑 Tabla de Contenidos
+1. [🚀 Visión General](#-visión-general)
+2. [📸 Galería de la Aplicación](#-galería-de-la-aplicación)
+3. [🏗️ Arquitectura del Sistema](#-arquitectura-del-sistema)
+4. [🛠️ Stack Tecnológico](#-stack-tecnológico)
+5. [🗄️ Modelo de Datos](#-modelo-de-datos)
 
-### 🏠 Landing & Autenticación
+---
+
+## 🚀 Visión General
+
+**Bata Enterprise Replica** no es solo una tienda online; es una orquestación de servicios diseñada para alta disponibilidad. El sistema resuelve problemas complejos como la concurrencia en inventarios, la seguridad en transacciones y la gestión de roles granulares.
+
+### Key Features
+* 🔐 **Seguridad Bancaria:** Autenticación robusta vía Spring Security + JWT.
+* 🛒 **Gestión de Estado Compleja:** Manejo de carritos y sesiones con Context API y persistencia optimizada.
+* ⚡ **Rendimiento:** Backend optimizado con Spring Data JPA y Frontend con carga perezosa (Lazy Loading).
+* 📱 **Responsive Design:** Interfaz "Mobile-First" construida con Tailwind CSS.
+
+---
+
+## 📸 Galería de la Aplicación
+
+<details>
+<summary><b>🔐 Autenticación & Perfil (Click para ver)</b></summary>
+<br>
+
 | Landing Page | Login |
 |:---:|:---:|
-| <img src="./assets/home-page.png" width="380" alt="Landing Page"/> | <img src="./assets/login.png" width="380" alt="Login"/> |
+| <img src="./assets/home-page.png" width="400" alt="Landing"/> | <img src="./assets/login.png" width="400" alt="Login"/> |
 
-| Registro | Perfil de Usuario |
+| Registro de Usuario | Perfil |
 |:---:|:---:|
-| <img src="./assets/register.png" width="380" alt="Register"/> | <img src="./assets/user-profile.png" width="380" alt="User Profile"/> |
+| <img src="./assets/register.png" width="400" alt="Register"/> | <img src="./assets/user-profile.png" width="400" alt="Profile"/> |
+</details>
 
----
+<details>
+<summary><b>🛒 Experiencia de Compra (Click para ver)</b></summary>
+<br>
 
-### 🛒 Experiencia de Usuario (E-commerce)
-| Lista de Productos | Detalle de Producto |
+| Catálogo | Detalle de Producto |
 |:---:|:---:|
-| <img src="./assets/product-list-user.png" width="380" alt="Product List"/> | <img src="./assets/product-detail-user.png" width="380" alt="Product Detail"/> |
+| <img src="./assets/product-list-user.png" width="400" alt="List"/> | <img src="./assets/products-detail-user.png" width="400" alt="Detail"/> |
 
-| Carrito | Detalle del Carrito |
+| Carrito | Checkout / Detalle |
 |:---:|:---:|
-| <img src="./assets/cart.png" width="380" alt="Cart"/> | <img src="./assets/cart-detail.png" width="380" alt="Cart Detail"/> |
+| <img src="./assets/cart.png" width="400" alt="Cart"/> | <img src="./assets/cart-detail-user.png" width="400" alt="Detail Cart"/> |
+</details>
 
-| Página 404 | — |
+<details>
+<summary><b>🛠️ Panel Administrativo (Click para ver)</b></summary>
+<br>
+
+| Dashboard General | Gestión de Productos |
 |:---:|:---:|
-| <img src="./assets/404.png" width="380" alt="404 Page"/> | — |
-
----
-
-### 🛠️ Panel Administrativo & Base de Datos
-| Panel Administrativo | Base de Datos |
-|:---:|:---:|
-| <img src="./assets/dashboard-admin.png" width="380" alt="Admin Dashboard"/> | <img src="./assets/database.png" width="380" alt="Database"/> |
+| <img src="./assets/dashboard-admin.png" width="400" alt="Admin"/> | <img src="./assets/create-product.png" width="400" alt="Create"/> |
+| **Edición de Inventario** | **Base de Datos** |
+| <img src="./assets/edit-product.png" width="400" alt="Edit"/> | <img src="./assets/database.png" width="400" alt="DB"/> |
+</details>
 
 ---
 
 ## 🏗️ Arquitectura del Sistema
 
-El sistema sigue una arquitectura desacoplada (Headless Commerce approach) para garantizar la escalabilidad y mantenibilidad.
+El sistema sigue un enfoque **Headless Commerce**, desacoplando totalmente el Frontend del Backend.
 
 ### 🔌 Backend (Spring Boot Ecosystem)
-Diseñado bajo el patrón **Package by Feature** para alta cohesión.
-* **Seguridad:** Implementación de `Spring Security` con **JWT (JSON Web Tokens)** y roles (Admin/User).
-* **Persistencia:** `Spring Data JPA` con MySQL. Relaciones complejas (1:N, N:M) y **Cascade Deletes** para integridad referencial.
-* **Manejo de Errores:** `GlobalExceptionHandler` (`@ControllerAdvice`) para respuestas HTTP estandarizadas.
-* **Integraciones:**
-    * `JavaMailSender`: Notificaciones SMTP transaccionales.
-    * `Cloudinary API`: Gestión de assets digitales.
+> Arquitectura limpia basada en **Package by Feature**.
+
+* `Security`: Filtros personalizados de **Spring Security** para intercepción de JWT.
+* `Persistencia`: **Spring Data JPA** optimizado con relaciones Lazy/Eager según el contexto.
+* `Error Handling`: `@ControllerAdvice` para devolver JSONs de error estandarizados (RFC 7807).
+* `Integraciones`:
+    * 📨 **JavaMailSender**: Para confirmaciones de compra.
+    * ☁️ **Cloudinary API**: Almacenamiento CDN para imágenes de productos.
 
 ### 🎨 Frontend (React + TypeScript)
-Estructura **Feature-based** para modularidad.
-* **Estilos:** `Tailwind CSS` con diseño **Mobile-First**.
-* **Estado:** Context API para gestión de carrito de compras y sesión de usuario.
-* **Seguridad:** Interceptores de Axios para manejo de tokens y renovación de sesión.
+> Modularidad a través de **Atomic Design** simplificado.
+
+* `Hooks Personalizados`: Para lógica reutilizable de consumo de API.
+* `Axios Interceptors`: Inyección automática de tokens y manejo de errores 401/403.
+* `Zustand / Context`: Gestión de estado global ligero.
 
 ---
 
 ## 🛠️ Stack Tecnológico
 
-### Core
-* **Lenguajes:** Java 21, TypeScript, SQL.
-* **Frameworks:** Spring Boot 3, React 18.
-* **Base de Datos:** MySQL.
+| Área | Tecnologías Clave |
+| :--- | :--- |
+| **Backend** | ![Java](https://img.shields.io/badge/-Java%2021-ED8B00?logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/-Spring%20Boot-6DB33F?logo=spring-boot&logoColor=white) ![Maven](https://img.shields.io/badge/-Maven-C71A36?logo=apache-maven&logoColor=white) |
+| **Frontend** | ![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=black) ![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?logo=typescript&logoColor=white) ![Tailwind](https://img.shields.io/badge/-Tailwind-06B6D4?logo=tailwindcss&logoColor=white) |
+| **Data** | ![MySQL](https://img.shields.io/badge/-MySQL-4479A1?logo=mysql&logoColor=white) ![Hibernate](https://img.shields.io/badge/-Hibernate-59666C?logo=hibernate&logoColor=white) |
+| **DevOps** | ![Docker](https://img.shields.io/badge/-Docker-2496ED?logo=docker&logoColor=white) ![Git](https://img.shields.io/badge/-Git-F05032?logo=git&logoColor=white) ![Postman](https://img.shields.io/badge/-Postman-FF6C37?logo=postman&logoColor=white) |
 
-### DevOps & Tools
-* **Control de Versiones:** Git & GitHub (Flujo Gitflow).
-* **Contenedores:** Docker (Futuro).
-* **API Testing:** Postman / Swagger UI.
 ---
 
-## 🗄️ Modelo de Base de Datos (Simplificado)
+## 🗄️ Diagrama Entidad-Relación
 
-El sistema maneja una estricta integridad referencial. Ejemplo de relación crítica:
+A continuación se muestra una versión simplificada de la lógica de negocio usando **Mermaid.js**.
 
 ```mermaid
 erDiagram
-    USER ||--o| LOGIN : credentials
-    USER ||--o{ ORDER : places
-    PRODUCT ||--|{ VARIANT : has
-    VARIANT ||--o{ ORDER_ITEM : contains
+    USER ||--o| LOGIN : "tiene credenciales"
+    USER ||--o{ ORDER : "realiza"
+    ORDER ||--|{ ORDER_ITEM : "contiene"
+    PRODUCT ||--|{ VARIANT : "tiene variaciones"
+    VARIANT ||--o{ ORDER_ITEM : "es parte de"
+    
+    USER {
+        string email
+        string role
+    }
+    ORDER {
+        date created_at
+        float total
+        enum status
+    }
+    PRODUCT {
+        string sku
+        string name
+    }
